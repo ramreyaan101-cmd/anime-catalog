@@ -127,5 +127,132 @@ $("#topSearch").addEventListener("keydown",event=>{if(event.key==="Enter"&&event
 async function start(){renderWatchlist();$("#loadMore").style.display="none";await initFilters();await Promise.allSettled([loadSection("TRENDING_DESC","trendingGrid"),loadSection("POPULARITY_DESC","popularGrid"),loadSeasonal(),loadUpcoming(),loadBrowse(true)])}
 start();
 </script>
+  <!-- ANIMEVERSE PRO HUB -->
+<style>
+#av-pro{margin:35px auto;padding:20px;max-width:1200px;background:#111827;color:#fff;border:1px solid #303b55;border-radius:18px;font-family:Arial,sans-serif}
+#av-pro h2{font-size:25px;margin:5px 0 10px}
+#av-pro p{color:#aebbd0}
+.av-search{display:flex;gap:8px;margin:18px 0}
+.av-search input{flex:1;min-width:0;padding:13px;border-radius:10px;border:1px solid #46536d;background:#202b40;color:white}
+#av-pro button,#av-pro select{padding:11px;border:0;border-radius:9px;background:#7655ed;color:white;cursor:pointer}
+#av-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:13px}
+.av-card{background:#202b40;border-radius:12px;overflow:hidden;padding-bottom:10px}
+.av-card img{width:100%;height:205px;object-fit:cover}
+.av-card h3{font-size:14px;padding:0 9px;min-height:34px}
+.av-card button{margin:0 8px;font-size:12px}
+.av-langs{display:flex;flex-wrap:wrap;gap:8px;margin:15px 0}
+.av-langs a{background:#293650;color:#d9d0ff;padding:9px 12px;border-radius:8px;text-decoration:none;font-size:13px}
+.av-entry{background:#202b40;padding:12px;border-radius:10px;margin:9px 0}
+.av-entry input,.av-entry select{margin:5px;max-width:100%}
+#av-message{color:#b8a8ff}
+@media(max-width:500px){#av-pro{padding:13px}.av-search{flex-wrap:wrap}.av-search input{width:100%}}
+</style>
+
+<section id="av-pro">
+  <h2>✨ ANIMEVERSE PRO HUB</h2>
+  <p>Discover anime from around the world.</p>
+  <div class="av-search">
+    <input id="av-query" placeholder="Search anime worldwide...">
+    <button id="av-search-btn">Search</button>
+  </div>
+  <div id="av-message">Search thousands of anime titles.</div>
+  <div id="av-results"></div>
+  <hr style="border-color:#303b55;margin:25px 0">
+  <h2>🌐 Six-Language Hub</h2>
+  <p>Explore official dub and subtitle information. Availability varies by anime and region.</p>
+  <div class="av-langs">
+    <a href="https://www.google.com/search?q=anime+Hindi+official+dub" target="_blank" rel="noopener">Hindi</a>
+    <a href="https://www.google.com/search?q=anime+English+official+dub" target="_blank" rel="noopener">English</a>
+    <a href="https://www.google.com/search?q=anime+Japanese+audio" target="_blank" rel="noopener">Japanese</a>
+    <a href="https://www.google.com/search?q=anime+Tamil+official+dub" target="_blank" rel="noopener">Tamil</a>
+    <a href="https://www.google.com/search?q=anime+Telugu+official+dub" target="_blank" rel="noopener">Telugu</a>
+    <a href="https://www.google.com/search?q=anime+Bengali+official+dub" target="_blank" rel="noopener">Bengali</a>
+  </div>
+  <hr style="border-color:#303b55;margin:25px 0">
+  <h2>📚 My Anime Library</h2>
+  <p>Your personal tracker is saved on this device.</p>
+  <div id="av-library"></div>
+  <button id="av-export">Export My Library</button>
+</section>
+
+<script>
+(()=>{
+const api="https://graphql.anilist.co";
+const key="animeverse_pro_library";
+const $=id=>document.getElementById(id);
+let library={};
+try{library=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){library={}}
+
+function save(){
+ localStorage.setItem(key,JSON.stringify(library));
+ renderLibrary();
+}
+function renderLibrary(){
+ const box=$("av-library");
+ box.innerHTML="";
+ const entries=Object.values(library);
+ if(!entries.length){box.innerHTML="<p>No saved anime yet. Search and add anime!</p>";return}
+ entries.forEach(a=>{
+  const div=document.createElement("div");div.className="av-entry";
+  const title=document.createElement("strong");title.textContent=a.title;
+  const status=document.createElement("select");
+  ["Plan to Watch","Watching","Completed","On Hold","Dropped"].forEach(s=>{
+   const o=document.createElement("option");o.value=s;o.textContent=s;status.appendChild(o);
+  });
+  status.value=a.status||"Plan to Watch";
+  status.onchange=()=>{a.status=status.value;save()};
+  const progress=document.createElement("input");
+  progress.type="number";progress.min=0;progress.max=9999;
+  progress.value=a.progress||0;progress.placeholder="Episodes watched";
+  progress.onchange=()=>{a.progress=Math.max(0,Number(progress.value)||0);save()};
+  const remove=document.createElement("button");remove.textContent="Remove";
+  remove.onclick=()=>{delete library[a.id];save()};
+  div.append(title,document.createElement("br"),status,progress,remove);
+  box.appendChild(div);
+ });
+}
+async function search(){
+ const query=$("av-query").value.trim();if(!query)return;
+ $("av-message").textContent="Searching anime catalogue...";
+ $("av-results").innerHTML="";
+ const gql=`query($search:String){Page(page:1,perPage:18){media(search:$search,type:ANIME,sort:SEARCH_MATCH){id title{romaji english native} coverImage{large} episodes format seasonYear}}}`;
+ try{
+  const response=await fetch(api,{
+   method:"POST",
+   headers:{"Content-Type":"application/json","Accept":"application/json"},
+   body:JSON.stringify({query:gql,variables:{search:query}})
+  });
+  if(!response.ok)throw Error("API request failed");
+  const json=await response.json();const items=json.data.Page.media;
+  $("av-message").textContent=items.length?items.length+" anime found.":"No anime found.";
+  items.forEach(a=>{
+   const card=document.createElement("div");card.className="av-card";
+   const img=document.createElement("img");img.src=a.coverImage.large;
+   img.alt=a.title.english||a.title.romaji;img.loading="lazy";
+   const h=document.createElement("h3");h.textContent=a.title.english||a.title.romaji;
+   const info=document.createElement("p");info.style.padding="0 9px";
+   info.textContent=(a.format||"Anime")+" • "+(a.seasonYear||"Year unknown")+" • "+(a.episodes||"?")+" eps";
+   const btn=document.createElement("button");
+   btn.textContent=library[a.id]?"Saved ✓":"＋ Add to Library";
+   btn.disabled=!!library[a.id];
+   btn.onclick=()=>{
+    library[a.id]={id:a.id,title:a.title.english||a.title.romaji,status:"Plan to Watch",progress:0};
+    save();btn.textContent="Saved ✓";btn.disabled=true;
+   };
+   card.append(img,h,info,btn);$("av-results").appendChild(card);
+  });
+ }catch(e){$("av-message").textContent="Could not load anime. Please try again later."}
+}
+$("av-search-btn").addEventListener("click",search);
+$("av-query").addEventListener("keydown",e=>{if(e.key==="Enter")search()});
+$("av-export").addEventListener("click",()=>{
+ const blob=new Blob([JSON.stringify(library,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);const a=document.createElement("a");
+ a.href=url;a.download="animeverse-library.json";a.click();URL.revokeObjectURL(url);
+});
+renderLibrary();
+})();
+</script>
+<!-- END ANIMEVERSE PRO HUB -->
 </body>
 </html>

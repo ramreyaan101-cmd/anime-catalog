@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Discover anime series, seasons, episodes and upcoming releases from around the world.">
+<title>ANIMEVERSE - Discover Anime</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0b12;color:#fff;font-family:Arial,sans-serif}
+header{height:70px;padding:0 6%;display:flex;align-items:center;justify-content:space-between;background:#11111b;border-bottom:1px solid #252535}
+.logo{font-size:23px;font-weight:900;color:#a78bfa;letter-spacing:1px}
+nav a{color:#ddd;text-decoration:none;margin-left:18px;font-size:13px}
+.hero{padding:65px 7%;background:linear-gradient(100deg,#19132f,#11111b 65%,#27134a)}
+.hero small{color:#b69cff;letter-spacing:3px}
+.hero h1{font-size:clamp(34px,7vw,58px);margin:18px 0}
+.hero p{color:#c2bfd0;max-width:480px;line-height:1.7}
+.btn{display:inline-block;margin-top:22px;background:#8055e9;color:white;padding:13px 23px;border:0;border-radius:7px;font-weight:bold;cursor:pointer}
+main{padding:35px 6%}
+.search{width:100%;padding:15px;background:#191925;border:1px solid #343447;border-radius:9px;color:white;font-size:15px;outline:none}
+.filters{display:flex;gap:9px;overflow-x:auto;margin:20px 0 28px}
+.filters button{white-space:nowrap;padding:10px 17px;background:#191925;color:#ddd;border:1px solid #333348;border-radius:25px;cursor:pointer}
+.filters button.active,.filters button:hover{background:#8055e9;color:white}
+.section-title{font-size:23px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#171722;border:1px solid #28283a;border-radius:10px;overflow:hidden;cursor:pointer;transition:.2s}
+.card:hover{transform:translateY(-5px);border-color:#9873f7}
+.poster{height:190px;display:flex;align-items:center;justify-content:center;text-align:center;padding:15px;background:linear-gradient(140deg,#39215c,#17172b);font-size:21px;font-weight:900}
+.card:nth-child(2n) .poster{background:linear-gradient(140deg,#123d55,#17172b)}
+.card:nth-child(3n) .poster{background:linear-gradient(140deg,#632c37,#17172b)}
+.info{padding:13px}
+.info h3{font-size:16px;margin-bottom:9px}
+.info p{font-size:12px;color:#aaa}
+.tag{display:inline-block;margin-top:10px;background:#302447;color:#c8adff;padding:5px 8px;border-radius:4px;font-size:11px}
+.empty{color:#aaa;padding:25px 0;display:none}
+footer{text-align:center;padding:30px;color:#888;border-top:1px solid #292938;margin-top:40px;font-size:13px}
+footer a{color:#b99cff}
+.modal{display:none;position:fixed;inset:0;background:#000c;align-items:center;justify-content:center;padding:20px;z-index:5}
+.modal-box{background:#1b1b2a;border:1px solid #51416f;padding:25px;border-radius:12px;width:100%;max-width:430px}
+.modal-box h2{margin-bottom:15px;color:#c4aaff}
+.modal-box p{color:#ccc;line-height:1.7;font-size:14px}
+.close{float:right;background:none;border:0;color:white;font-size:24px;cursor:pointer}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr);gap:12px}.poster{height:155px;font-size:17px}nav a{margin-left:9px;font-size:11px}.hero{padding:48px 6%}}
+@media(max-width:360px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">ANIMEVERSE</div>
+<nav>
+<a href="#">Home</a>
+<a href="#anime">Anime</a>
+<a href="#footer">About</a>
+</nav>
+</header>
+
+<section class="hero">
+<small>YOUR ANIME DISCOVERY DESTINATION</small>
+<h1>ENTER THE<br>WORLD OF ANIME.</h1>
+<p>Discover legendary anime, explore new seasons, follow episode releases and find your next favourite series.</p>
+<a href="#anime"><button class="btn">EXPLORE ANIME →</button></a>
+</section>
+
+<main id="anime">
+<input id="search" class="search" placeholder="Search your favourite anime..." />
+
+<div class="filters">
+<button class="active" onclick="filterAnime('All',this)">All Anime</button>
+<button onclick="filterAnime('Action',this)">Action</button>
+<button onclick="filterAnime('Adventure',this)">Adventure</button>
+<button onclick="filterAnime('Fantasy',this)">Fantasy</button>
+<button onclick="filterAnime('Ongoing',this)">Ongoing</button>
+</div>
+
+<h2 class="section-title">Popular Anime</h2>
+
+<div class="grid" id="grid">
+<div class="card" data-name="Naruto Shippuden" data-category="Action Adventure" onclick="showDetails(this)">
+<div class="poster">NARUTO<br>SHIPPUDEN</div>
+<div class="info"><h3>Naruto Shippuden</h3><p>Action • Adventure</p><span class="tag">Completed</span></div>
+</div>
+
+<div class="card" data-name="Demon Slayer" data-category="Action Fantasy" onclick="showDetails(this)">
+<div class="poster">DEMON<br>SLAYER</div>
+<div class="info"><h3>Demon Slayer</h3><p>Action • Fantasy</p><span class="tag">Anime Series</span></div>
+</div>
+
+<div class="card" data-name="Dragon Ball Z" data-category="Action Adventure" onclick="showDetails(this)">
+<div class="poster">DRAGON<br>BALL Z</div>
+<div class="info"><h3>Dragon Ball Z</h3><p>Action • Adventure</p><span class="tag">Completed</span></div>
+</div>
+
+<div class="card" data-name="Jujutsu Kaisen" data-category="Action Fantasy Ongoing" onclick="showDetails(this)">
+<div class="poster">JUJUTSU<br>KAISEN</div>
+<div class="info"><h3>Jujutsu Kaisen</h3><p>Action • Fantasy</p><span class="tag">Series</span></div>
+</div>
+</div>
+
+<p class="empty" id="empty">No anime found. Try another name.</p>
+</main>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+<div class="modal-box">
+<button class="close" onclick="closeModal()">×</button>
+<h2 id="detailName"></h2>
+<p id="detailText"></p>
+<p style="margin-top:15px">Audio information and official viewing links will be added after verification.</p>
+<button class="btn" onclick="closeModal()">CLOSE</button>
+</div>
+</div>
+
+<footer id="footer">
+<p>ANIMEVERSE © 2026</p>
+<p style="margin-top:9px">An independent anime discovery platform.</p>
+<p style="margin-top:9px"><a href="#">About</a> · <a href="#">Contact</a> · <a href="#">Privacy Policy</a></p>
+</footer>
+
+<script>
+let currentFilter="All";
+const cards=[...document.querySelectorAll(".card")];
+
+function update(){
+let q=document.getElementById("search").value.toLowerCase();
+let count=0;
+cards.forEach(card=>{
+let matchName=card.dataset.name.toLowerCase().includes(q);
+let matchCategory=currentFilter==="All" || card.dataset.category.includes(currentFilter);
+card.style.display=matchName && matchCategory ? "" : "none";
+if(matchName && matchCategory) count++;
+});
+document.getElementById("empty").style.display=count?"none":"block";
+}
+function filterAnime(category,button){
+currentFilter=category;
+document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+update();
+}
+document.getElementById("search").addEventListener("input",update);
+
+function showDetails(card){
+document.getElementById("detailName").textContent=card.dataset.name;
+document.getElementById("detailText").textContent="Explore information, genres, seasons and episode updates for "+card.dataset.name+".";
+document.getElementById("modal").style.display="flex";
+}
+function closeModal(){
+document.getElementById("modal").style.display="none";
+}
+</script>
+</body>
+  </html>
+  
